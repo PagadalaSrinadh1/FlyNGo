@@ -1,12 +1,12 @@
 // frontend/src/pages/Home.js
-// MODIFIED - Displaying date and time together for flights.
+// FIX: Added '/api' prefix to all API calls to match backend routes.
 
 import React, { useState, useEffect } from 'react';
 import { Container, Form, Button, Row, Col, Alert } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
 import api from '../services/api';
 import Select from 'react-select';
-import { indianCities } from '../data/cities'; 
+import { indianCities } from '../data/cities';
 import './Home.css';
 
 // Helper function to format date strings
@@ -29,7 +29,8 @@ const Home = () => {
     const fetchLatestFlights = async () => {
       setLoading(true);
       try {
-        const response = await api.get('/flights/latest');
+        // FIX: Added /api prefix
+        const response = await api.get('/api/flights/latest');
         setFlights(response.data);
       } catch (err) {
         console.error('Could not fetch latest flights:', err);
@@ -44,7 +45,7 @@ const Home = () => {
   const handleCityChange = (selectedOption, actionMeta) => {
     setSearchCriteria(prev => ({ ...prev, [actionMeta.name]: selectedOption ? selectedOption.value : '' }));
   };
-  
+
   const handleDateChange = (e) => setSearchCriteria({ ...searchCriteria, [e.target.name]: e.target.value });
 
   const handleSearch = async (e) => {
@@ -58,7 +59,8 @@ const Home = () => {
         return;
       }
       const params = new URLSearchParams(searchCriteria);
-      const response = await api.get(`/flights/search?${params}`);
+      // FIX: Added /api prefix
+      const response = await api.get(`/api/flights/search?${params}`);
       setFlights(response.data);
       setSearched(true);
     } catch (err) {
@@ -125,9 +127,7 @@ const Home = () => {
             {flights.map((flight) => (
               <div key={flight._id} className="flight-result-item">
                 <div><strong>{flight.airline}</strong><small className="d-block text-muted">Flight: {flight.flightNumber}</small></div>
-                {/* --- FIX: Display Date & Time --- */}
                 <div><strong>Start: {flight.departure.city}</strong><small className="d-block text-muted">{formatDate(flight.departure.date)} - {flight.departure.time}</small></div>
-                {/* --- FIX: Display Date & Time --- */}
                 <div><strong>Destination: {flight.arrival.city}</strong><small className="d-block text-muted">{formatDate(flight.arrival.date)} - {flight.arrival.time}</small></div>
                 <div><strong>Starting Price: ${flight.price.economy}</strong><small className="d-block text-muted">Seats: {flight.seats.economy.available}</small></div>
                 <Link to={`/book/${flight._id}`}><Button className="book-btn">Book Now</Button></Link>
